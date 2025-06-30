@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wordle Clone</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f5f3f4;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    .game-board {
+      display: grid;
+      gap: 5px;
+      margin-top: 20px;
+    }
+
+    .attempt {
+      display: flex;
+      justify-content: center;
+    }
+
+    .letter {
+      width: 40px;
+      height: 40px;
+      border: 1px solid #ccc;
+      font-size: 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 5px;
+    }
+
+    .correct {
+      background-color: #6aaa64;
+      color: white;
+    }
+
+    .present {
+      background-color: #c9b458;
+      color: white;
+    }
+
+    .absent {
+      background-color: #d11a2a; /* Red for letters not in the word */
+      color: white;
+    }
+
+    input, button {
+      font-size: 1.2rem;
+      padding: 5px;
+      margin-top: 20px;
+    }
+
+    .message {
+      font-size: 1.2rem;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Wordle Clone</h1>
+
+    <div id="game-board" class="game-board"></div>
+    <input type="text" id="word-input" maxlength="5" placeholder="Enter a word">
+    <button id="guess-btn">Guess</button>
+
+    <!-- Message and retry button will be shown after game ends -->
+    <div id="message-container" style="display:none;">
+      <p id="game-message" class="message"></p>
+      <button id="retry-btn">Try Another Word</button>
+    </div>
+  </div>
+
+  <script>
+    const WORDS = ["apple", "grape", "lemon", "peach", "plum"];
+    const MAX_ATTEMPTS = 5;
+
+    let targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+    let attempts = Array(MAX_ATTEMPTS).fill('');
+    let currentAttempt = 0;
+    let gameOver = false;
+
+    function renderGameBoard() {
+      const gameBoard = document.getElementById('game-board');
+      gameBoard.innerHTML = '';
+
+      attempts.forEach((attempt, index) => {
+        const attemptDiv = document.createElement('div');
+        attemptDiv.classList.add('attempt');
+
+        for (let i = 0; i < targetWord.length; i++) {
+          const letterDiv = document.createElement('div');
+          letterDiv.classList.add('letter');
+
+          if (index === currentAttempt && !gameOver) {
+            // Show the guess without color coding
+            letterDiv.textContent = attempt[i] || '';
+          } else if (attempt !== '') {
+            // Check letter status for completed attempts
+            if (attempt[i] === targetWord[i]) {
+              letterDiv.classList.add('correct');
+            } else if (targetWord.includes(attempt[i])) {
+              letterDiv.classList.add('present');
+            } else {
+              letterDiv.classList.add('absent');
+            }
+            letterDiv.textContent = attempt[i];
+          }
+
+          attemptDiv.appendChild(letterDiv);
+        }
+
+        gameBoard.appendChild(attemptDiv);
+      });
+    }
+
+    function handleGuess() {
+      const input = document.getElementById('word-input');
+
+      if (gameOver) {
+        input.value = '';
+        return;
+      }
+
+      // Get the word from input
+      const guess = input.value.toLowerCase();
+
+      // Only accept 5-letter words
+      if (guess.length !== targetWord.length) {
+        alert(`Please enter a ${targetWord.length}-letter word.`);
+        input.value = '';
+        return;
+      }
+
+      // Update the current attempt with the guess
+      attempts[currentAttempt] = guess;
+
+      // Clear the input field
+      input.value = '';
+
+      // Check if the guess is correct
+      if (guess === targetWord) {
+        gameOver = true;
+        showGameMessage('Congratulations! You guessed the word!');
+        renderGameBoard();
+        return;
+      }
+
+      // Move to next attempt or end game
+      if (currentAttempt < MAX_ATTEMPTS - 1) {
+        currentAttempt++;
+      } else {
+        gameOver = true;
+        showGameMessage(`Sorry, you've used all your attempts. The word was: ${targetWord}`);
+      }
+
+      renderGameBoard();
+    }
+
+    function resetGame() {
+      targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+      attempts = Array(MAX_ATTEMPTS).fill('');
+      currentAttempt = 0;
+      gameOver = false;
+
+      // Hide message and retry button
+      const messageContainer = document.getElementById('message-container');
+      messageContainer.style.display = 'none';
+
+      renderGameBoard();
+    }
+
+    function showGameMessage(message) {
+      const messageContainer = document.getElementById('message-container');
+      const gameMessage = document.getElementById('game-message');
+
+      gameMessage.textContent = message;
+      messageContainer.style.display = 'block';
+    }
+
+    // Event listeners
+    document.getElementById('guess-btn').addEventListener('click', handleGuess);
+    document.getElementById('retry-btn').addEventListener('click', resetGame);
+
+    // Initial render
+    renderGameBoard();
+  </script>
+</body>
+</html>
