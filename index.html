@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -71,11 +72,27 @@
       font-size: 1.2rem;
       margin-top: 20px;
     }
+
+    /* Styles for the image */
+    .image-container {
+      margin-top: 20px;
+    }
+
+    .image-container img {
+      max-width: 80%;
+      height: auto;
+      border-radius: 10px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Wordle Clone</h1>
+
+    <!-- Image section -->
+    <div class="image-container">
+      <img src="malthus.webp" alt="Commander">
+    </div>
 
     <div id="game-board" class="game-board"></div>
     <input type="text" id="word-input" maxlength="5" placeholder="Enter a word">
