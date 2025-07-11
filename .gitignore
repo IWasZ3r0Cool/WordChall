@@ -1,0 +1,58 @@
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+logs
+*.log
+server.log
+
+# Browser screenshots
+.browser_screenshots/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Mac OS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Temporary files
+*.tmp
+
+# Build directories
+dist
+build
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Coverage reports
+coverage/
+
+# Dependency directories
+vendor/
+bower_components/
+
+# Compiled output
+*.compiled
+*.min.js
+*.min.css
+
+# Development tools
+gruntfile.js
+gulpfile.js
+webpack.config.js
+package-lock.json
+yarn.lock
+
