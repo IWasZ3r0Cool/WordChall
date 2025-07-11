@@ -1,14 +1,16 @@
 
 
-# Wordle Clone Game
 
-This is a simple web-based implementation of a Wordle-like game. The game allows users to guess a randomly selected 5-letter word within a limited number of attempts.
+# Wordchall: Battletech-Themed Wordle Game
+
+Wordchall is a web-based implementation of a Wordle-like game with a twist - all words are themed around the Battletech universe. Players guess randomly selected 5-letter words related to Battletech within a limited number of attempts.
 
 ## Features
 
 - Simple and intuitive user interface
 - Immediate feedback on letter correctness (correct position, present in word, or not in word)
 - Responsive design that works well on both desktop and mobile devices
+- Battletech-themed words for an immersive gaming experience
 
 ## Getting Started
 
@@ -37,7 +39,7 @@ You'll need Node.js installed on your machine to run this project.
 
 ## How to Play
 
-1. Enter a 5-letter word in the input field.
+1. Enter a 5-letter Battletech-themed word in the input field.
 2. Click "Guess" to submit your guess.
 3. The letters will be color-coded based on their correctness:
    - Green: Letter is in the correct position
@@ -61,3 +63,4 @@ Contributions are welcome! Please feel free to submit a pull request with any im
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
