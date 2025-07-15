@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -63,10 +61,63 @@
       color: white;
     }
 
-    input, button {
-      font-size: 1.2rem;
-      padding: 5px;
+    /* Keyboard styles */
+    .keyboard {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       margin-top: 20px;
+    }
+
+    .keyboard-row {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .key {
+      width: 40px;
+      height: 40px;
+      font-size: 1.2rem;
+      border: none;
+      background-color: #e0e0e0;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .key:hover {
+      background-color: #d0d0d0;
+    }
+
+    /* Keyboard key states */
+    .key.correct {
+      background-color: #6aaa64;
+      color: white;
+    }
+
+    .key.present {
+      background-color: #c9b458;
+      color: white;
+    }
+
+    .key.absent {
+      background-color: #d11a2a; /* Red for letters not in the word */
+      color: white;
+    }
+
+    /* Special key styles */
+    .special-key {
+      flex-grow: 1;
+      max-width: calc(50% - 10px);
+      width: auto !important;
+      padding: 0 10px;
+      font-size: 1rem;
+    }
+
+    /* Disabled key styles */
+    .key:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
     }
 
     .message {
@@ -96,8 +147,46 @@
     </div>
 
     <div id="game-board" class="game-board"></div>
-    <input type="text" id="word-input" maxlength="5" placeholder="Enter a word">
-    <button id="guess-btn">Guess</button>
+
+    <!-- Virtual Keyboard -->
+    <div id="keyboard" class="keyboard">
+      <div class="keyboard-row">
+        <button class="key" data-letter="Q">Q</button>
+        <button class="key" data-letter="W">W</button>
+        <button class="key" data-letter="E">E</button>
+        <button class="key" data-letter="R">R</button>
+        <button class="key" data-letter="T">T</button>
+        <button class="key" data-letter="Y">Y</button>
+        <button class="key" data-letter="U">U</button>
+        <button class="key" data-letter="I">I</button>
+        <button class="key" data-letter="O">O</button>
+        <button class="key" data-letter="P">P</button>
+      </div>
+      <div class="keyboard-row">
+        <button class="key" data-letter="A">A</button>
+        <button class="key" data-letter="S">S</button>
+        <button class="key" data-letter="D">D</button>
+        <button class="key" data-letter="F">F</button>
+        <button class="key" data-letter="G">G</button>
+        <button class="key" data-letter="H">H</button>
+        <button class="key" data-letter="J">J</button>
+        <button class="key" data-letter="K">K</button>
+        <button class="key" data-letter="L">L</button>
+      </div>
+      <div class="keyboard-row">
+        <button class="key" data-letter="Z">Z</button>
+        <button class="key" data-letter="X">X</button>
+        <button class="key" data-letter="C">C</button>
+        <button class="key" data-letter="V">V</button>
+        <button class="key" data-letter="B">B</button>
+        <button class="key" data-letter="N">N</button>
+        <button class="key" data-letter="M">M</button>
+      </div>
+      <div class="keyboard-row">
+        <button id="delete-btn" class="key special-key">⌫</button>
+        <button id="enter-btn" class="key special-key">Enter</button>
+      </div>
+    </div>
 
     <!-- Message and retry button will be shown after game ends -->
     <div id="message-container" style="display:none;">
@@ -114,111 +203,178 @@
     let attempts = Array(MAX_ATTEMPTS).fill('');
     let currentAttempt = 0;
     let gameOver = false;
+    let currentGuess = '';
+    let letterStates = {};
 
     function renderGameBoard() {
       const gameBoard = document.getElementById('game-board');
       gameBoard.innerHTML = '';
 
-      attempts.forEach((attempt, index) => {
+      for (let i = 0; i < MAX_ATTEMPTS; i++) {
         const attemptDiv = document.createElement('div');
         attemptDiv.classList.add('attempt');
-
-        for (let i = 0; i < targetWord.length; i++) {
+        for (let j = 0; j < targetWord.length; j++) {
           const letterDiv = document.createElement('div');
           letterDiv.classList.add('letter');
-
-          if (index === currentAttempt && !gameOver) {
-            // Show the guess without color coding
-            letterDiv.textContent = attempt[i] || '';
-          } else if (attempt !== '') {
-            // Check letter status for completed attempts
-            if (attempt[i] === targetWord[i]) {
-              letterDiv.classList.add('correct');
-            } else if (targetWord.includes(attempt[i])) {
-              letterDiv.classList.add('present');
-            } else {
-              letterDiv.classList.add('absent');
-            }
-            letterDiv.textContent = attempt[i];
-          }
-
           attemptDiv.appendChild(letterDiv);
         }
-
         gameBoard.appendChild(attemptDiv);
+      }
+    }
+
+    function updateCurrentAttempt() {
+      const attemptDiv = document.querySelectorAll('.attempt')[currentAttempt];
+      for (let i = 0; i < targetWord.length; i++) {
+        const letterDiv = attemptDiv.children[i];
+        letterDiv.textContent = currentGuess[i] || '';
+      }
+    }
+
+    function colorCodeAttempt() {
+      const attemptDiv = document.querySelectorAll('.attempt')[currentAttempt];
+      for (let i = 0; i < targetWord.length; i++) {
+        const letterDiv = attemptDiv.children[i];
+        const letter = currentGuess[i];
+        if (letter === targetWord[i]) {
+          letterDiv.classList.add('correct');
+        } else if (targetWord.includes(letter)) {
+          letterDiv.classList.add('present');
+        } else {
+          letterDiv.classList.add('absent');
+        }
+      }
+    }
+
+    function resetGameBoard() {
+      const attempts = document.querySelectorAll('.attempt');
+      for (let i = 0; i < attempts.length; i++) {
+        const attemptDiv = attempts[i];
+        for (let j = 0; j < attemptDiv.children.length; j++) {
+          const letterDiv = attemptDiv.children[j];
+          letterDiv.textContent = '';
+          letterDiv.classList.remove('correct', 'present', 'absent');
+        }
+      }
+    }
+
+    function updateKeyboardKeyStates() {
+      // Determine the state of each letter from all attempts
+      for (const attempt of attempts) {
+        if (attempt === '') continue;
+
+        for (let i = 0; i < attempt.length; i++) {
+          const letter = attempt[i];
+          if (targetWord[i] === letter) {
+            letterStates[letter] = 'correct';
+          } else if (targetWord.includes(letter)) {
+            if (letterStates[letter] !== 'correct') {
+              letterStates[letter] = 'present';
+            }
+          } else {
+            if (!letterStates[letter]) {
+              letterStates[letter] = 'absent';
+            }
+          }
+        }
+      }
+
+      // Update keyboard keys based on the determined states
+      document.querySelectorAll('.key[data-letter]').forEach(key => {
+        const letter = key.dataset.letter;
+        key.classList.remove('correct', 'present', 'absent'); // Reset classes
+        key.disabled = false; // Reset disabled state
+
+        if (letterStates[letter]) {
+          key.classList.add(letterStates[letter]);
+          if (letterStates[letter] === 'absent') {
+            key.disabled = true;
+          }
+        }
       });
     }
 
-    function handleGuess() {
-      const input = document.getElementById('word-input');
-
-      if (gameOver) {
-        input.value = '';
+    function handleKeyPress(letter) {
+      if (gameOver || currentGuess.length >= targetWord.length) {
         return;
       }
 
-      // Get the word from input
-      const guess = input.value.toLowerCase();
-
-      // Only accept 5-letter words
-      if (guess.length !== targetWord.length) {
-        alert(`Please enter a ${targetWord.length}-letter word.`);
-        input.value = '';
-        return;
-      }
-
-      // Update the current attempt with the guess
-      attempts[currentAttempt] = guess;
-
-      // Clear the input field
-      input.value = '';
-
-      // Check if the guess is correct
-      if (guess === targetWord) {
-        gameOver = true;
-        showGameMessage('Congratulations! You guessed the word!');
-        renderGameBoard();
-        return;
-      }
-
-      // Move to next attempt or end game
-      if (currentAttempt < MAX_ATTEMPTS - 1) {
-        currentAttempt++;
-      } else {
-        gameOver = true;
-        showGameMessage(`Sorry, you've used all your attempts. The word was: ${targetWord}`);
-      }
-
-      renderGameBoard();
+      // Add letter to the current guess
+      currentGuess += letter.toUpperCase();
+      updateCurrentAttempt();
     }
 
-    function resetGame() {
+    function handleDelete() {
+      if (gameOver || currentGuess.length === 0) {
+        return;
+      }
+
+      // Remove last letter from the guess
+      currentGuess = currentGuess.slice(0, -1);
+      updateCurrentAttempt();
+    }
+
+    function handleEnter() {
+      if (gameOver || currentGuess.length !== targetWord.length) {
+        return;
+      }
+
+      colorCodeAttempt();
+      updateKeyboardKeyStates();
+      attempts[currentAttempt] = currentGuess;
+
+      if (currentGuess === targetWord) {
+        handleGameOver(true);
+      } else if (currentAttempt === MAX_ATTEMPTS - 1) {
+        handleGameOver(false);
+      } else {
+        currentAttempt++;
+        currentGuess = '';
+      }
+    }
+
+    function handleGameOver(isWin) {
+      gameOver = true;
+      updateMessage(isWin ? 'Congratulations! You guessed the word!' : `Sorry, you've used all your attempts. The word was: ${targetWord}`);
+    }
+
+    function startGame() {
       targetWord = WORDS[Math.floor(Math.random() * WORDS.length)];
       attempts = Array(MAX_ATTEMPTS).fill('');
       currentAttempt = 0;
       gameOver = false;
+      currentGuess = '';
+      letterStates = {};
 
-      // Hide message and retry button
-      const messageContainer = document.getElementById('message-container');
-      messageContainer.style.display = 'none';
-
+      updateMessage();
       renderGameBoard();
+      resetGameBoard();
+      updateKeyboardKeyStates();
     }
 
-    function showGameMessage(message) {
+    function updateMessage(message = '') {
       const messageContainer = document.getElementById('message-container');
       const gameMessage = document.getElementById('game-message');
 
       gameMessage.textContent = message;
-      messageContainer.style.display = 'block';
+      messageContainer.style.display = message ? 'block' : 'none';
     }
 
-    // Event listeners
-    document.getElementById('guess-btn').addEventListener('click', handleGuess);
-    document.getElementById('retry-btn').addEventListener('click', resetGame);
+    // Event listeners for keyboard keys
+    document.querySelectorAll('.key[data-letter]').forEach(key => {
+      key.addEventListener('click', () => handleKeyPress(key.dataset.letter));
+    });
+
+    // Add event listener for the Enter key
+    document.getElementById('enter-btn').addEventListener('click', handleEnter);
+    // Add event listener for the Delete key
+    document.getElementById('delete-btn').addEventListener('click', handleDelete);
+
+    // Event listener for retry button
+    document.getElementById('retry-btn').addEventListener('click', startGame);
 
     // Initial render
     renderGameBoard();
+    startGame();
   </script>
 </body>
 </html>
