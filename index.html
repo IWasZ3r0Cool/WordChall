@@ -138,6 +138,26 @@
       height: auto;
       border-radius: 10px;
     }
+
+    /* Modal styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -191,10 +211,12 @@
       </div>
     </div>
 
-    <!-- Message and retry button will be shown after game ends -->
-    <div id="message-container" style="display:none;">
-      <p id="game-message" class="message"></p>
-      <button id="retry-btn">Try Another Word</button>
+    <!-- Modal for win/loss messages -->
+    <div id="modal" class="modal" style="display:none;">
+      <div class="modal-content">
+        <p id="modal-message"></p>
+        <button id="play-again-btn">Play Again</button>
+      </div>
     </div>
   </div>
 
@@ -349,7 +371,10 @@
 
     function handleGameOver(isWin) {
       gameOver = true;
-      updateMessage(isWin ? 'Congratulations! You guessed the word!' : `Sorry, you've used all your attempts. The word was: ${targetWord}`);
+      const modal = document.getElementById('modal');
+      const modalMessage = document.getElementById('modal-message');
+      modalMessage.textContent = isWin ? 'Congratulations! You guessed the word!' : `Sorry, you've used all your attempts. The word was: ${targetWord}`;
+      modal.style.display = 'flex';
     }
 
     function startGame() {
@@ -360,17 +385,9 @@
       currentGuess = '';
       letterStates = {};
 
+      document.getElementById('modal').style.display = 'none';
       renderGameBoard();
-      updateMessage();
       updateKeyboardKeyStates();
-    }
-
-    function updateMessage(message = '') {
-      const messageContainer = document.getElementById('message-container');
-      const gameMessage = document.getElementById('game-message');
-
-      gameMessage.textContent = message;
-      messageContainer.style.display = message ? 'block' : 'none';
     }
 
     // Event listeners for keyboard keys
@@ -384,7 +401,7 @@
     document.getElementById('delete-btn').addEventListener('click', handleDelete);
 
     // Event listener for retry button
-    document.getElementById('retry-btn').addEventListener('click', startGame);
+    document.getElementById('play-again-btn').addEventListener('click', startGame);
 
     // Physical keyboard support
     document.addEventListener('keydown', (e) => {
