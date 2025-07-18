@@ -308,6 +308,11 @@
         return;
       }
 
+      const keyElement = document.querySelector(`.key[data-letter="${letter.toUpperCase()}"]`);
+      if (keyElement && keyElement.disabled) {
+        return;
+      }
+
       // Add letter to the current guess
       currentGuess += letter.toUpperCase();
       updateCurrentAttempt();
@@ -380,6 +385,17 @@
 
     // Event listener for retry button
     document.getElementById('retry-btn').addEventListener('click', startGame);
+
+    // Physical keyboard support
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        handleEnter();
+      } else if (e.key === 'Backspace') {
+        handleDelete();
+      } else if (e.key.match(/^[a-zA-Z]$/)) {
+        handleKeyPress(e.key);
+      }
+    });
 
     // Initial render
     startGame();
