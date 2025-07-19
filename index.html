@@ -6,17 +6,42 @@
   <title>Do you Dare Refuse My Wordchall?</title>
   <style>
     body {
+      --background-color: #f5f3f4;
+      --text-color: #000000;
+      --key-bg-color: #e0e0e0;
+      --key-hover-bg-color: #d0d0d0;
+      --letter-border-color: #ccc;
+      --modal-content-bg: white;
+
       font-family: Arial, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
-      background-color: #f5f3f4;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body.dark-mode {
+      --background-color: #121212;
+      --text-color: #ffffff;
+      --key-bg-color: #818384;
+      --key-hover-bg-color: #565758;
+      --letter-border-color: #3a3a3c;
+      --modal-content-bg: #333;
     }
 
     .container {
       text-align: center;
+    }
+
+    .header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
     }
 
     h1 {
@@ -38,7 +63,7 @@
     .letter {
       width: 40px;
       height: 40px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--letter-border-color);
       font-size: 1.5rem;
       display: flex;
       justify-content: center;
@@ -80,13 +105,14 @@
       height: 40px;
       font-size: 1.2rem;
       border: none;
-      background-color: #e0e0e0;
+      background-color: var(--key-bg-color);
+      color: var(--text-color);
       cursor: pointer;
       transition: background-color 0.3s;
     }
 
     .key:hover {
-      background-color: #d0d0d0;
+      background-color: var(--key-hover-bg-color);
     }
 
     /* Keyboard key states */
@@ -138,15 +164,99 @@
       height: auto;
       border-radius: 10px;
     }
+
+    /* Modal styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: var(--modal-content-bg);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    /* Theme switch styles */
+    .theme-switch-wrapper {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+
+    .theme-switch {
+      display: inline-block;
+      height: 34px;
+      position: relative;
+      width: 60px;
+    }
+
+    .theme-switch input {
+      display: none;
+    }
+
+    .slider {
+      background-color: #ccc;
+      bottom: 0;
+      cursor: pointer;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+      transition: .4s;
+    }
+
+    .slider:before {
+      background-color: #fff;
+      bottom: 4px;
+      content: "";
+      height: 26px;
+      left: 4px;
+      position: absolute;
+      transition: .4s;
+      width: 26px;
+    }
+
+    input:checked + .slider {
+      background-color: #6aaa64;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .slider.round {
+      border-radius: 34px;
+    }
+
+    .slider.round:before {
+      border-radius: 50%;
+    }
   </style>
 </head>
 <body>
+  <div class="theme-switch-wrapper">
+    <label class="theme-switch" for="checkbox">
+      <input type="checkbox" id="checkbox" />
+      <div class="slider round"></div>
+    </label>
+  </div>
   <div class="container">
-    <h1>Do you Dare Refuse my Wordchall?</h1>
+    <div class="header">
+      <h1>Do you Dare Refuse my Wordchall?</h1>
+    </div>
 
     <!-- Image section -->
     <div class="image-container">
-      <img src="malthus.webp" alt="Commander">
+      <img src="https://via.placeholder.com/300x200.webp?text=Your+Image+Here" alt="Commander">
     </div>
 
     <div id="game-board" class="game-board"></div>
@@ -191,15 +301,17 @@
       </div>
     </div>
 
-    <!-- Message and retry button will be shown after game ends -->
-    <div id="message-container" style="display:none;">
-      <p id="game-message" class="message"></p>
-      <button id="retry-btn">Try Another Word</button>
+    <!-- Modal for win/loss messages -->
+    <div id="modal" class="modal" style="display:none;">
+      <div class="modal-content">
+        <p id="modal-message"></p>
+        <button id="play-again-btn">Play Again</button>
+      </div>
     </div>
   </div>
 
   <script>
-    const WORDS = ["MECH", "CLAN", "ARMOR", "LASER", "CORED", "ATLAS", "GAUSS", "HANSE", "PILOT", "MARIK", 
+    const WORDS = ["MECH", "CRAB", "OBERON", "ASANO", "HELM", "CARLYLE", "CLAN", "ARMOR", "LASER", "CORED", "ATLAS", "GAUSS", "HANSE", "PILOT", "MARIK", 
     "ERPPC","FERRO", "LANCE", "ORION", "BLAKE", "PIRATE", "MERC", "ULRIC", "PRYDE", "GYRO", "SARNA", "KURITA", 
     "DAVION", "HEAT", "LAIO", "JENNER", "LOCUST", "MADCAT", "ZEUS", "HANSE", "DAVION", "ENDO", "STEINER", "LYRAN",
      "KITFOX", "ADDER", "ILKHAN", "DEST", "TBOLT", "MADDOG", "AMARIS" ];
@@ -349,7 +461,10 @@
 
     function handleGameOver(isWin) {
       gameOver = true;
-      updateMessage(isWin ? 'Congratulations! You guessed the word!' : `Sorry, you've used all your attempts. The word was: ${targetWord}`);
+      const modal = document.getElementById('modal');
+      const modalMessage = document.getElementById('modal-message');
+      modalMessage.textContent = isWin ? 'How did you best me? I am a bloodnamed warrior of Clan Jade Falcon!' : `I've crushed you, defective freebirth. Next time try guessing: ${targetWord}`;
+      modal.style.display = 'flex';
     }
 
     function startGame() {
@@ -360,17 +475,9 @@
       currentGuess = '';
       letterStates = {};
 
+      document.getElementById('modal').style.display = 'none';
       renderGameBoard();
-      updateMessage();
       updateKeyboardKeyStates();
-    }
-
-    function updateMessage(message = '') {
-      const messageContainer = document.getElementById('message-container');
-      const gameMessage = document.getElementById('game-message');
-
-      gameMessage.textContent = message;
-      messageContainer.style.display = message ? 'block' : 'none';
     }
 
     // Event listeners for keyboard keys
@@ -384,7 +491,7 @@
     document.getElementById('delete-btn').addEventListener('click', handleDelete);
 
     // Event listener for retry button
-    document.getElementById('retry-btn').addEventListener('click', startGame);
+    document.getElementById('play-again-btn').addEventListener('click', startGame);
 
     // Physical keyboard support
     document.addEventListener('keydown', (e) => {
@@ -399,6 +506,32 @@
 
     // Initial render
     startGame();
+
+    // Theme switcher logic
+    const themeSwitch = document.getElementById('checkbox');
+    themeSwitch.addEventListener('change', () => {
+      if (themeSwitch.checked) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+      }
+    });
+
+    // Apply saved theme on load
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+      themeSwitch.checked = true;
+    } else if (savedTheme === 'light') {
+      document.body.classList.remove('dark-mode');
+      themeSwitch.checked = false;
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      // Fallback to OS preference
+      document.body.classList.add('dark-mode');
+      themeSwitch.checked = true;
+    }
   </script>
 </body>
 </html>
