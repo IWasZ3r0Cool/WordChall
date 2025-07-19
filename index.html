@@ -187,8 +187,9 @@
 
     /* Theme switch styles */
     .theme-switch-wrapper {
-      display: flex;
-      align-items: center;
+      position: absolute;
+      top: 20px;
+      right: 20px;
     }
 
     .theme-switch {
@@ -242,15 +243,15 @@
   </style>
 </head>
 <body>
+  <div class="theme-switch-wrapper">
+    <label class="theme-switch" for="checkbox">
+      <input type="checkbox" id="checkbox" />
+      <div class="slider round"></div>
+    </label>
+  </div>
   <div class="container">
     <div class="header">
       <h1>Do you Dare Refuse my Wordchall?</h1>
-      <div class="theme-switch-wrapper">
-        <label class="theme-switch" for="checkbox">
-          <input type="checkbox" id="checkbox" />
-          <div class="slider round"></div>
-        </label>
-      </div>
     </div>
 
     <!-- Image section -->
