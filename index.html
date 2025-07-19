@@ -6,17 +6,42 @@
   <title>Do you Dare Refuse My Wordchall?</title>
   <style>
     body {
+      --background-color: #f5f3f4;
+      --text-color: #000000;
+      --key-bg-color: #e0e0e0;
+      --key-hover-bg-color: #d0d0d0;
+      --letter-border-color: #ccc;
+      --modal-content-bg: white;
+
       font-family: Arial, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
-      background-color: #f5f3f4;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body.dark-mode {
+      --background-color: #121212;
+      --text-color: #ffffff;
+      --key-bg-color: #818384;
+      --key-hover-bg-color: #565758;
+      --letter-border-color: #3a3a3c;
+      --modal-content-bg: #333;
     }
 
     .container {
       text-align: center;
+    }
+
+    .header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
     }
 
     h1 {
@@ -38,7 +63,7 @@
     .letter {
       width: 40px;
       height: 40px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--letter-border-color);
       font-size: 1.5rem;
       display: flex;
       justify-content: center;
@@ -80,13 +105,14 @@
       height: 40px;
       font-size: 1.2rem;
       border: none;
-      background-color: #e0e0e0;
+      background-color: var(--key-bg-color);
+      color: var(--text-color);
       cursor: pointer;
       transition: background-color 0.3s;
     }
 
     .key:hover {
-      background-color: #d0d0d0;
+      background-color: var(--key-hover-bg-color);
     }
 
     /* Keyboard key states */
@@ -153,16 +179,79 @@
     }
 
     .modal-content {
-      background-color: white;
+      background-color: var(--modal-content-bg);
       padding: 20px;
       border-radius: 10px;
       text-align: center;
+    }
+
+    /* Theme switch styles */
+    .theme-switch-wrapper {
+      display: flex;
+      align-items: center;
+    }
+
+    .theme-switch {
+      display: inline-block;
+      height: 34px;
+      position: relative;
+      width: 60px;
+    }
+
+    .theme-switch input {
+      display: none;
+    }
+
+    .slider {
+      background-color: #ccc;
+      bottom: 0;
+      cursor: pointer;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+      transition: .4s;
+    }
+
+    .slider:before {
+      background-color: #fff;
+      bottom: 4px;
+      content: "";
+      height: 26px;
+      left: 4px;
+      position: absolute;
+      transition: .4s;
+      width: 26px;
+    }
+
+    input:checked + .slider {
+      background-color: #6aaa64;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .slider.round {
+      border-radius: 34px;
+    }
+
+    .slider.round:before {
+      border-radius: 50%;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Do you Dare Refuse my Wordchall?</h1>
+    <div class="header">
+      <h1>Do you Dare Refuse my Wordchall?</h1>
+      <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="checkbox">
+          <input type="checkbox" id="checkbox" />
+          <div class="slider round"></div>
+        </label>
+      </div>
+    </div>
 
     <!-- Image section -->
     <div class="image-container">
@@ -373,7 +462,7 @@
       gameOver = true;
       const modal = document.getElementById('modal');
       const modalMessage = document.getElementById('modal-message');
-      modalMessage.textContent = isWin ? 'Congratulations! You guessed the word!' : `Sorry, you've used all your attempts. The word was: ${targetWord}`;
+      modalMessage.textContent = isWin ? 'How did you best me? I am bloodnamed warrior of Clan Jade Falcon!' : `I've crushed you, defective freebirth. Next time try guessing: ${targetWord}`;
       modal.style.display = 'flex';
     }
 
@@ -416,6 +505,32 @@
 
     // Initial render
     startGame();
+
+    // Theme switcher logic
+    const themeSwitch = document.getElementById('checkbox');
+    themeSwitch.addEventListener('change', () => {
+      if (themeSwitch.checked) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+      }
+    });
+
+    // Apply saved theme on load
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+      themeSwitch.checked = true;
+    } else if (savedTheme === 'light') {
+      document.body.classList.remove('dark-mode');
+      themeSwitch.checked = false;
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      // Fallback to OS preference
+      document.body.classList.add('dark-mode');
+      themeSwitch.checked = true;
+    }
   </script>
 </body>
 </html>
